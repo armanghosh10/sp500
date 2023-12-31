@@ -26,6 +26,8 @@ for name, group in df.groupby(level='ticker'):
     bb_highs.extend(bbands['BBU_20_2.0'])
 
 # Assign the results back to the DataFrame
-data['bb_low'] = bb_lows
-data['bb_mid'] = bb_mids
-data['bb_high'] = bb_highs
+data['BB_Low'] = bb_lows
+data['BB_Mid'] = bb_mids
+data['BB_High'] = bb_highs
+
+data['ATR'] = data.groupby(level=1, group_keys=False).apply(compute_atr)
