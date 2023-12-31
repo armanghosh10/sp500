@@ -1,0 +1,6 @@
+ compute_garman_klass_vol(stock_data): 
+    stock_data['Garman_Class_Vol'] = ((np.log(stock_data['High'])-np.log(stock_data['Low']))**2)/2-(2*np.log(2)-1)*
+    ((np.log(stock_data['Adj Close'])-np.log(stock_data['Open']))**2)
+    return stock_data
+
+    
