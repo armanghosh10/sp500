@@ -32,3 +32,4 @@ data['BB_High'] = bb_highs
 
 data['ATR'] = data.groupby(level=1, group_keys=False).apply(compute_atr)
 data['MACD'] = data.groupby(level=1, group_keys=False)['Adj Close'].apply(compute_macd)
+compute_dollar_volume(data)
