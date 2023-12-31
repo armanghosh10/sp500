@@ -33,3 +33,10 @@ data['BB_High'] = bb_highs
 data['ATR'] = data.groupby(level=1, group_keys=False).apply(compute_atr)
 data['MACD'] = data.groupby(level=1, group_keys=False)['Adj Close'].apply(compute_macd)
 compute_dollar_volume(data)
+
+cols_list = []
+for columns in data.columns.unique(0).tolist():
+    if columns not in ['Dollar Volume','Volume','Open','High','Low','Close']:
+        cols_list.append(columns)
+pd.concat([data.unstack('ticker')['Dollar Volume'].resample('M').mean().stack('ticker').to_frame('Dollar Volume'),
+           data.unstack()[cols_list].resample('M').last().stack('ticker')],axis=1).dropna()
