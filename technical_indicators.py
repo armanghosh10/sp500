@@ -19,3 +19,12 @@ def compute_atr(stock_data):
                         length=14)
 
     return atr.sub(atr.mean()).div(atr.std()) #Returning normalised ATR values
+
+def compute_macd(stock_data):
+    macd = pandas_ta.macd(close=stock_data, length=20).iloc[:,0]
+    return macd.sub(macd.mean()).div(macd.std())
+
+def compute_dollar_volume(stock_data): 
+    stock_data['Dollar Volume'] = (stock_data['Adj Close']*stock_data['Volume'])/1e6
+    return stock_data 
+
