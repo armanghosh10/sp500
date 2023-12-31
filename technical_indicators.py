@@ -11,3 +11,11 @@ def compute_bbands(stock_data):
     bbands = pandas_ta.bbands(close=np.log1p(stock_data), length=20)
     # The columns will be ['BBL', 'BBM', 'BBU', 'BBB', 'BBP'] by default
     return bbands
+
+def compute_atr(stock_data): 
+    atr = pandas_ta.atr(high=stock_data['High'],
+                        low=stock_data['Low'],
+                        close=stock_data['Close'],
+                        length=14)
+
+    return atr.sub(atr.mean()).div(atr.std()) #Returning normalised ATR values
