@@ -50,4 +50,4 @@ factor_data = web.DataReader('F-F_Research_Data_5_Factors_2x3','famafrench',star
 factor_data.index = factor_data.index.to_timestamp()
 factor_data = factor_data.resample('M').last().div(100)
 factor_data.index.name = 'date'
-factor_data.join(data['1month_return'])
+factor_data = factor_data.join(data['1month_return']).sort_index()
