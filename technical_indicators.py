@@ -28,3 +28,12 @@ def compute_dollar_volume(stock_data):
     stock_data['Dollar Volume'] = (stock_data['Adj Close']*stock_data['Volume'])/1e6
     return stock_data 
 
+def compute_returns(stock_data): 
+    outlier_cutoff = 0.005
+    lags = [1, 2, 3, 6, 9, 12]
+    for lag in lags: 
+        stock_data[f'{lag}month_return'] = (stock_data['Adj Close'].pct_change(lag)
+                                           .pipe(lambda x: x.clip(lower=x.quantile(outlier_cutoff),
+                                            upper=x.quantile(1-outlier_cutoff)))
+                                           .add(1).pow(1/lag).sub(1))
+    return stock_data
