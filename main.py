@@ -44,3 +44,10 @@ data = pd.concat([data.unstack('ticker')['Dollar Volume'].resample('M').mean().s
 data['Dollar Volume'] = data['Dollar Volume'].unstack('ticker').rolling(5*12).mean().stack()
 data['Dollar Volume Rank'] = (data.groupby('date')['Dollar Volume'].rank(ascending=False))
 data = data[data['Dollar Volume Rank']<150].drop(['Dollar Volume', 'Dollar Volume Rank'], axis=1)
+data = data.groupby(level=1, group_keys=False).apply(compute_returns).dropna()
+
+factor_data = web.DataReader('F-F_Research_Data_5_Factors_2x3','famafrench',start='2010')[0].drop('RF',axis=1)
+factor_data.index = factor_data.index.to_timestamp()
+factor_data = factor_data.resample('M').last().div(100)
+factor_data.index.name = 'date'
+factor_data.join(data['1month_return'])
