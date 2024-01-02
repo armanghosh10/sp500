@@ -38,5 +38,9 @@ cols_list = []
 for columns in data.columns.unique(0).tolist():
     if columns not in ['Dollar Volume','Volume','Open','High','Low','Close']:
         cols_list.append(columns)
-pd.concat([data.unstack('ticker')['Dollar Volume'].resample('M').mean().stack('ticker').to_frame('Dollar Volume'),
+data = pd.concat([data.unstack('ticker')['Dollar Volume'].resample('M').mean().stack('ticker').to_frame('Dollar Volume'),
            data.unstack()[cols_list].resample('M').last().stack('ticker')],axis=1).dropna()
+
+data['Dollar Volume'] = data['Dollar Volume'].unstack('ticker').rolling(5*12).mean().stack()
+data['Dollar Volume Rank'] = (data.groupby('date')['Dollar Volume'].rank(ascending=False))
+data = data[data['Dollar Volume Rank']<150].drop(['Dollar Volume', 'Dollar Volume Rank'], axis=1)
