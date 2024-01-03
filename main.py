@@ -9,6 +9,7 @@ import yfinance as yf
 import pandas_ta
 import warnings
 
+
 #Calculating all the technical indicators for S&P500 Stocks 
 compute_garman_klass_vol(data)
 compute_rsi(data)
@@ -41,7 +42,7 @@ for columns in data.columns.unique(0).tolist():
 data = pd.concat([data.unstack('ticker')['Dollar Volume'].resample('M').mean().stack('ticker').to_frame('Dollar Volume'),
            data.unstack()[cols_list].resample('M').last().stack('ticker')],axis=1).dropna()
 
-data['Dollar Volume'] = data['Dollar Volume'].unstack('ticker').rolling(5*12).mean().stack()
+data['Dollar Volume'] = data['Dollar Volume'].unstack('ticker').rolling(5*12, min_periods=12).mean().stack()
 data['Dollar Volume Rank'] = (data.groupby('date')['Dollar Volume'].rank(ascending=False))
 data = data[data['Dollar Volume Rank']<150].drop(['Dollar Volume', 'Dollar Volume Rank'], axis=1)
 data = data.groupby(level=1, group_keys=False).apply(compute_returns).dropna()
@@ -51,3 +52,22 @@ factor_data.index = factor_data.index.to_timestamp()
 factor_data = factor_data.resample('M').last().div(100)
 factor_data.index.name = 'date'
 factor_data = factor_data.join(data['1month_return']).sort_index()
+observations = factor_data.groupby(level=1).size()
+valid_stocks = observations[observations>=10]
+factor_data = factor_data[factor_data.index.get_level_values('ticker').isin(valid_stocks.index)]
+
+betas = factor_data.groupby(level=1, group_keys=False).apply(lambda x: 
+    RollingOLS(endog=x['1month_return'],
+               exog=sm.add_constant(x.drop('1month_return', axis=1)), 
+               window=min(24, x.shape[0]),
+               min_nobs=len(x.columns) + 1)
+    .fit(params_only=True)
+    .params
+    .drop('const', axis=1)
+)
+data = data.join(betas.groupby('ticker').shift())
+factors = ['Mkt-RF','SMB','HML','RMW','CMA']
+data.loc[:, factors] = data.groupby('ticker', group_keys=False)[factors].apply(lambda x: x.fillna(x.mean()))
+data = data.drop('Adj Close', axis=1)
+data = data.dropna()
+
