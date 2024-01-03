@@ -71,3 +71,9 @@ data.loc[:, factors] = data.groupby('ticker', group_keys=False)[factors].apply(l
 data = data.drop('Adj Close', axis=1)
 data = data.dropna()
 
+plt.style.use('ggplot')
+for i in data.index.get_level_values('date').unique().tolist():
+    g = data.xs(i, level=0)
+    plt.title(f'Date {i}')
+    plot_clusters(g)
+
